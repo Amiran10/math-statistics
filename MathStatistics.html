@@ -1,0 +1,157 @@
+<!DOCTYPE html> 
+<html>
+<head>
+  <title>Statistics Calculator</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <h1>Statistics Calculator</h1>
+  <label for="values">Enter values (separate by spaces):</label>
+  <input type="text" id="values" name="values"><br><br>
+  <button onclick="calculate()">Calculate</button><br><br>
+  <p id="List"></p>
+  <p id="numValues"></p>
+  <p id="minValue"></p>
+  <p id="maxValue"></p>
+  <p id="meanValue"></p>
+  <p id="modeValue"></p>
+  <p id="rangeValue"></p>
+  <p id="q1Value"></p>
+  <p id="q2Value"></p>
+  <p id="q3Value"></p>
+  <script>
+  const calculate = () => {
+    const input = document.getElementById("values").value.trim();
+    const Q = input.split(" ").map(x => Number(x.trim()));
+    if (Q.some(isNaN)) {
+      alert("Invalid input. Please enter spaces between values only.");
+      return;
+    };
+    
+    const showArray = arr => {
+        arr.sort((a, b) => a - b);
+  let list = "List: ";
+  for (let i = 0; i < arr.length; i++) {
+    list += arr[i];
+    if (i < arr.length - 1) {
+      list += ", ";
+    }
+  }
+  document.getElementById("List").textContent = list;
+}
+    showArray(Q);
+    getQuartiles(Q);
+    percentile_75 = getPercentile(Q, 75);
+    // Calculate and display the number of values
+    const numValues = Q.length;
+    document.getElementById("numValues").textContent = `Number of values: ${numValues}`;
+
+    // Calculate and display the minimum value
+    const min = Math.min(...Q);
+    document.getElementById("minValue").textContent = `Minimum value: ${min}`;
+
+    // Calculate and display the maximum value
+    const max = Math.max(...Q);
+    document.getElementById("maxValue").textContent = `Maximum value: ${max}`;
+
+    // Calculate and display the mean value
+    const getMean = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+    const mean = `Mean: ${getMean(Q)}`;
+    document.getElementById("meanValue").textContent = mean;
+
+    // Calculate and display the mode value(s)
+    const findMode = arr => {
+      const modeObj = {};
+      let maxFrequency = 0;
+      arr.forEach(num => {
+        if (!modeObj[num]) modeObj[num] = 0;
+        modeObj[num]++;
+        if (modeObj[num] > maxFrequency) maxFrequency = modeObj[num];
+      });
+
+
+      const modes = [];
+      for (const num in modeObj) {
+        if (modeObj[num] === maxFrequency) modes.push(num);
+      }
+
+      if (modes.length === arr.length) {
+        document.getElementById("modeValue").textContent = "Mode: All values appear equally frequently";
+      } else {
+        document.getElementById("modeValue").textContent = `Mode value(s): ${modes.join(", ")}`;
+      }
+    }
+    findMode(Q);
+
+    // Calculate and display the range
+    const range = `Range: ${max - min}`;
+    document.getElementById("rangeValue").textContent = range;
+
+    // Calculate and display the quartiles
+  function getQuartiles(arr) {
+  let Q1 = 0, Q2 = 0, Q3 = 0;
+  const middleIndex = Math.floor(arr.length / 2);
+   
+  if (arr.length % 2 === 0) {
+    lowerHalf = arr.slice(0, middleIndex);
+    const upperHalf = arr.slice(middleIndex);
+    Q2 = (lowerHalf[lowerHalf.length - 1] + upperHalf[0]) / 2;
+    let index = Math.floor(arr.length / 2);
+    if (arr.length % 4 === 0) {
+    Q1 = arr[(index / 2) - 1];
+    } else {
+    index--;
+    Q1 = (arr[Math.floor(index/2)] + arr[Math.floor((index / 2) - 1)]) /     2.0;
+    }
+
+    let middle = Math.floor(arr.length / 2);
+    if (arr.length % 4 === 0) {
+    Q3 = arr[(middle + arr.length) / 2];
+    } else {
+    middle -= 1;
+    let result = Math.floor((arr.length + middle) / 2);
+    Q3 = (arr[result] + arr[result+1]) / 2.0;
+    }    
+    } else {
+    Q2 = arr[middleIndex];
+    const lowerHalf = arr.slice(0, middleIndex);
+    const upperHalf = arr.slice(middleIndex + 1);
+    const lowerMiddleIndex = Math.floor(lowerHalf.length / 2);
+    const upperMiddleIndex = Math.floor(upperHalf.length / 2);
+    if (lowerHalf.length % 2 === 0) {
+      Q1 = (lowerHalf[lowerMiddleIndex - 1] + lowerHalf[lowerMiddleIndex]) / 2;
+    } else {
+      Q1 = lowerHalf[lowerMiddleIndex];
+    }
+    if (upperHalf.length % 2 === 0) {
+      Q3 = (upperHalf[upperMiddleIndex - 1] + upperHalf[upperMiddleIndex]) / 2;
+    } else {
+      Q3 = upperHalf[upperMiddleIndex];
+    }
+  }
+
+  document.getElementById("q1Value").textContent = `Q1: ${Q1}`;
+  document.getElementById("q2Value").textContent = `Q2: ${Q2}`;
+  document.getElementById("q3Value").textContent = `Q3: ${Q3}`;
+}
+}
+
+  const getPercentile = (arr, p) => {
+  if (arr.length === 0) return null;
+  if (arr.length === 1) return arr[0];
+
+  arr.sort((a, b) => a - b);
+  const index = (p / 100) * (arr.length - 1);
+  const floor = Math.floor(index);
+  const diff = index - floor;
+  if (floor + 1 < arr.length) {
+    return arr[floor] + diff * (arr[floor + 1] - arr[floor]);
+  } else {
+    return arr[floor];
+  }
+};
+
+</script>
+</body>
+</html>
